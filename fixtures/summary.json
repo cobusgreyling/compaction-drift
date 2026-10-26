@@ -1,0 +1,6 @@
+{
+  "text": "Summary of the dropped turns: finance corrected the limit to 2500 ZAR. Claim file reads did not change the blocking field. The model stayed as agreed in the opening.",
+  "set": {
+    "limit_zar": "2500"
+  }
+}
