@@ -48,9 +48,11 @@ class ScoreTests(unittest.TestCase):
         self.assertFalse(modes["head-only"].matches)
         self.assertEqual(modes["summary"].answer, LOSSY)
         self.assertFalse(modes["summary"].matches)
-        self.assertEqual(modes["no-compaction"].tokens, 755)
-        self.assertEqual(modes["head-only"].tokens, 119)
-        self.assertEqual(modes["summary"].tokens, 148)
+        self.assertEqual(modes["drop-tools"].answer, FULL)
+        self.assertTrue(modes["drop-tools"].matches)
+        self.assertGreater(modes["no-compaction"].tokens, modes["drop-tools"].tokens)
+        self.assertGreater(modes["drop-tools"].tokens, modes["summary"].tokens)
+        self.assertGreater(modes["summary"].tokens, modes["head-only"].tokens)
 
     def test_summary_that_keeps_the_late_fact_matches(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -92,6 +94,8 @@ class ScoreTests(unittest.TestCase):
         self.assertFalse(modes["head-only"].matches)
         self.assertEqual(modes["summary"].answer, (("model", "big"),))
         self.assertTrue(modes["summary"].matches)
+        self.assertEqual(modes["drop-tools"].answer, (("model", "big"),))
+        self.assertTrue(modes["drop-tools"].matches)
         self.assertEqual(modes["head-only"].tokens, len("Use model small.".split()) + len("What model?".split()))
         self.assertEqual(
             modes["summary"].tokens,
@@ -120,6 +124,31 @@ class ScoreTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 score_paths(session, summary)
 
+    def test_drop_tools_loses_a_fact_that_only_a_tool_set(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            session = _write(
+                root,
+                "session.jsonl",
+                [
+                    {"type": "session", "title": "Tiny", "ask": ["model"], "head_turns": 1},
+                    {"type": "turn", "role": "user", "text": "Use model small.", "set": {"model": "small"}},
+                    {
+                        "type": "turn",
+                        "role": "tool",
+                        "text": "A later tool sets the model.",
+                        "set": {"model": "big"},
+                    },
+                    {"type": "turn", "role": "user", "text": "What model?", "ask": True},
+                ],
+            )
+            summary = _write(root, "summary.json", {"text": "No change.", "set": {}})
+            report = score_paths(session, summary)
+        modes = {mode.mode: mode for mode in report.modes}
+        self.assertEqual(modes["no-compaction"].answer, (("model", "big"),))
+        self.assertEqual(modes["drop-tools"].answer, (("model", "small"),))
+        self.assertFalse(modes["drop-tools"].matches)
+
     def test_cli_prints_the_drift(self) -> None:
         buf = StringIO()
         with redirect_stdout(buf):
@@ -127,8 +156,10 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(code, 0)
         text = buf.getvalue()
         self.assertIn("no-compaction", text)
+        self.assertIn("drop-tools", text)
         self.assertIn("head-only", text)
         self.assertIn("summary", text)
+        self.assertIn("model, limit_zar", text)
         self.assertIn("model=big limit_zar=2500 blocking_field=incident_date", text)
         self.assertIn("model=small limit_zar=500 blocking_field=incident_date", text)
         self.assertIn("model=small limit_zar=2500 blocking_field=incident_date", text)

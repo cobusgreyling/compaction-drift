@@ -1,39 +1,16 @@
 {"type": "session", "id": "claim-bot", "title": "Ship the claim bot", "ask": ["model", "limit_zar", "blocking_field"], "head_turns": 6}
 {"type": "turn", "role": "user", "text": "Ship the claim bot for the motor book. The model is small. The limit is 500 ZAR. The blocking field is incident_date. Hold those three until a later correction.", "set": {"model": "small", "limit_zar": "500", "blocking_field": "incident_date"}}
 {"type": "turn", "role": "agent", "text": "Noted. Opening decision is model small, limit 500 ZAR, and blocking field incident_date."}
-{"type": "turn", "role": "tool", "text": "Tool read product/motor-policy.md. The book is motor. No later limit or model appears in this file."}
+{"type": "turn", "role": "tool", "text": "Tool read product/motor-policy.md. The book is motor. This file does not set a later limit or model."}
 {"type": "turn", "role": "tool", "text": "Tool read schema/claim.json. Fields present are incident_date, amount, and channel. This read does not change the ship decision."}
 {"type": "turn", "role": "agent", "text": "Schema matches the opening note. I am not changing model, limit, or blocking field yet."}
 {"type": "turn", "role": "user", "text": "Look through the claim files before we decide. Do not treat a file amount as the limit."}
 {"type": "turn", "role": "user", "text": "Correction from finance: the limit is 2500 ZAR, not 500. Leave the model and the blocking field alone for now.", "set": {"limit_zar": "2500"}}
 {"type": "turn", "role": "tool", "text": "Tool read claims/claim-1041.json. Status open. Channel voice. Amount 840 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1042.json. Status open. Channel voice. Amount 877 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1043.json. Status open. Channel voice. Amount 914 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1044.json. Status open. Channel voice. Amount 951 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1045.json. Status open. Channel voice. Amount 988 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1046.json. Status open. Channel voice. Amount 1025 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1047.json. Status open. Channel voice. Amount 1062 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1048.json. Status open. Channel voice. Amount 1099 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1049.json. Status open. Channel voice. Amount 1136 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1050.json. Status open. Channel voice. Amount 1173 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1051.json. Status open. Channel voice. Amount 1210 ZAR. This file does not set the ship model or the limit."}
+{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1048.json. Status open. Channel voice. Amount 1099 ZAR. The caller asked for a callback. This file does not set the ship model or the limit."}
+{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1061.json. Status closed. Channel chat. Amount 1629 ZAR. Closed claims stay out of the ship limit."}
 {"type": "turn", "role": "agent", "text": "First pass read those claim files. Amounts stay in the files. Ship facts are unchanged by this pass."}
 {"type": "turn", "role": "user", "text": "Second correction: do not use model small. Claims must use model big. The limit and the blocking field stay as they are.", "set": {"model": "big"}}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1052.json. Status closed. Channel chat. Amount 1260 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1053.json. Status closed. Channel chat. Amount 1301 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1054.json. Status closed. Channel chat. Amount 1342 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1055.json. Status closed. Channel chat. Amount 1383 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1056.json. Status closed. Channel chat. Amount 1424 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1057.json. Status closed. Channel chat. Amount 1465 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1058.json. Status closed. Channel chat. Amount 1506 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1059.json. Status closed. Channel chat. Amount 1547 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1060.json. Status closed. Channel chat. Amount 1588 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1061.json. Status closed. Channel chat. Amount 1629 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1062.json. Status closed. Channel chat. Amount 1670 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1063.json. Status closed. Channel chat. Amount 1711 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1064.json. Status closed. Channel chat. Amount 1752 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1065.json. Status closed. Channel chat. Amount 1793 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "tool", "text": "Tool read claims/claim-1066.json. Status closed. Channel chat. Amount 1834 ZAR. This file does not set the ship model or the limit."}
-{"type": "turn", "role": "agent", "text": "Second pass finished. File amounts are not the ship limit. Waiting on the three ship facts."}
 {"type": "turn", "role": "tool", "text": "Tool run local checks. The checks do not reprint model, limit, or blocking field."}
+{"type": "turn", "role": "agent", "text": "Second pass finished. File amounts are not the ship limit. Waiting on the three ship facts."}
 {"type": "turn", "role": "user", "text": "What do we ship? Reply with model, limit_zar, and blocking_field only.", "ask": true}

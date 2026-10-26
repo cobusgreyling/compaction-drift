@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-MODES = ("no-compaction", "head-only", "summary")
+MODES = ("no-compaction", "drop-tools", "head-only", "summary")
 
 
 @dataclass(frozen=True)
@@ -58,29 +58,29 @@ def score_paths(session_path: Path, summary_path: Path) -> Report:
     summary_turn = Turn("summary", summary.text, summary.sets, False)
     kept = {
         "no-compaction": prior + (question,),
+        "drop-tools": tuple(turn for turn in prior if turn.role != "tool") + (question,),
         "head-only": head + (question,),
         "summary": head + (summary_turn, question),
     }
     reference = _answer(kept["no-compaction"], session.ask)
-    modes = tuple(
-        ModeResult(
-            mode=mode,
-            tokens=sum(_tokens(turn.text) for turn in kept[mode]),
-            answer=_answer(kept[mode], session.ask),
-            matches=_answer(kept[mode], session.ask) == reference,
-        )
-        for mode in MODES
-    )
+    modes = tuple(_mode_result(mode, kept[mode], session.ask, reference) for mode in MODES)
     return Report(str(session_path), str(summary_path), session.title, modes)
 
 
 def format_table(report: Report) -> str:
-    header = ("mode", "tokens kept", "matches", "final answer")
+    reference = _reference(report)
+    header = ("mode", "tokens kept", "matches", "drifted facts", "final answer")
     rows = [
-        (mode.mode, str(mode.tokens), "yes" if mode.matches else "no", _format_answer(mode.answer))
+        (
+            mode.mode,
+            str(mode.tokens),
+            "yes" if mode.matches else "no",
+            _drifted(mode, reference),
+            _format_answer(mode.answer),
+        )
         for mode in report.modes
     ]
-    widths = [max(len(header[index]), *(len(row[index]) for row in rows)) for index in range(4)]
+    widths = [max(len(header[index]), *(len(row[index]) for row in rows)) for index in range(5)]
 
     def line(cells: tuple[str, ...]) -> str:
         parts = []
@@ -100,20 +100,51 @@ def format_table(report: Report) -> str:
 
 
 def format_details(report: Report) -> str:
-    reference = next(mode for mode in report.modes if mode.mode == "no-compaction")
+    reference = _reference(report)
     blocks = [report.title]
     for mode in report.modes:
         if mode.mode == "no-compaction":
             continue
         lines = [mode.mode]
-        drifted = [
-            f"  {key} {value} != {ref}"
-            for (key, value), (_, ref) in zip(mode.answer, reference.answer, strict=True)
-            if value != ref
-        ]
-        lines.extend(drifted or ["  no drift"])
+        lines.extend(_drift_lines(mode, reference) or ["  no drift"])
         blocks.append("\n".join(lines))
     return "\n\n".join(blocks)
+
+
+def _mode_result(
+    mode: str,
+    turns: tuple[Turn, ...],
+    ask: tuple[str, ...],
+    reference: tuple[tuple[str, str], ...],
+) -> ModeResult:
+    answer = _answer(turns, ask)
+    return ModeResult(
+        mode=mode,
+        tokens=sum(_tokens(turn.text) for turn in turns),
+        answer=answer,
+        matches=answer == reference,
+    )
+
+
+def _reference(report: Report) -> ModeResult:
+    return next(mode for mode in report.modes if mode.mode == "no-compaction")
+
+
+def _drifted(mode: ModeResult, reference: ModeResult) -> str:
+    names = [key for key, _, _ in _fact_deltas(mode, reference)]
+    return ", ".join(names) if names else "none"
+
+
+def _drift_lines(mode: ModeResult, reference: ModeResult) -> list[str]:
+    return [f"  {key} {value} != {ref}" for key, value, ref in _fact_deltas(mode, reference)]
+
+
+def _fact_deltas(mode: ModeResult, reference: ModeResult) -> list[tuple[str, str, str]]:
+    return [
+        (key, value, ref)
+        for (key, value), (_, ref) in zip(mode.answer, reference.answer, strict=True)
+        if value != ref
+    ]
 
 
 def _answer(turns: tuple[Turn, ...], ask: tuple[str, ...]) -> tuple[tuple[str, str], ...]:
